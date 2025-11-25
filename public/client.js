@@ -1,44 +1,31 @@
-async setupWebRTC() {
+// Simple socket connection for Railway
+async startChat() {
     try {
-        this.peerConnection = new RTCPeerConnection(this.rtcConfig);
+        // Request camera and microphone
+        this.localStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        });
 
-        // Add local stream tracks
-        if (this.localStream) {
-            this.localStream.getTracks().forEach(track => {
-                this.peerConnection.addTrack(track, this.localStream);
-            });
-        }
+        // Show chat screen
+        this.showScreen('chatScreen');
+        this.hideModal('permissionModal');
 
-        // Handle remote stream
-        this.peerConnection.ontrack = (event) => {
-            console.log('Remote track received:', event);
-            const remoteVideo = document.getElementById('remoteVideo');
-            if (event.streams && event.streams[0]) {
-                remoteVideo.srcObject = event.streams[0];
-                this.remoteStream = event.streams[0];
-            }
-        };
+        // Simple socket connection - Railway will handle URL
+        this.socket = io();
 
-        // Handle ICE candidates
-        this.peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                this.socket.emit('webrtc-ice-candidate', {
-                    candidate: event.candidate
-                });
-            }
-        };
+        // Setup socket events
+        this.setupSocketEvents();
 
-        // Handle connection state
-        this.peerConnection.onconnectionstatechange = () => {
-            console.log('Connection state:', this.peerConnection.connectionState);
-        };
+        // Show local video
+        const localVideo = document.getElementById('localVideo');
+        localVideo.srcObject = this.localStream;
 
-        // Create and send offer
-        const offer = await this.peerConnection.createOffer();
-        await this.peerConnection.setLocalDescription(offer);
-        this.socket.emit('webrtc-offer', { offer: offer });
+        // Start finding partner
+        this.socket.emit('find-partner');
 
     } catch (error) {
-        console.error('Error setting up WebRTC:', error);
+        console.error('Error accessing media devices:', error);
+        this.showModal('permissionModal');
     }
 }

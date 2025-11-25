@@ -6,25 +6,25 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io with proper CORS for Vercel
+// Socket.io with proper CORS for Railway
 const io = socketIo(server, {
   cors: {
-    origin: [
-      "https://lchangra-dwzj8oh8l-ppodinaofficials-projects.vercel.app",
-      "https://lchangra.vercel.app", 
-      "http://localhost:3000"
-    ],
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true
-  },
-  transports: ['websocket', 'polling']
+  }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Add health check endpoint
+// Serve main page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Server is running' });
+  res.json({ status: 'OK', message: 'Lchangra Server Running' });
 });
 
 // Waiting users queue
@@ -37,7 +37,7 @@ io.on('connection', (socket) => {
   socket.on('find-partner', () => {
     console.log('Finding partner for:', socket.id);
     
-    // Remove from any existing pair
+    // Clean up existing connections
     if (activePairs.has(socket.id)) {
       const partnerId = activePairs.get(socket.id);
       activePairs.delete(socket.id);
@@ -45,7 +45,6 @@ io.on('connection', (socket) => {
       socket.to(partnerId).emit('partner-disconnected');
     }
 
-    // Remove from waiting list if already there
     waitingUsers = waitingUsers.filter(id => id !== socket.id);
 
     // Find partner
@@ -59,8 +58,8 @@ io.on('connection', (socket) => {
         activePairs.set(partnerId, socket.id);
         
         // Notify both users
-        socket.emit('partner-found', { partnerId });
-        partnerSocket.emit('partner-found', { partnerId });
+        socket.emit('partner-found');
+        partnerSocket.emit('partner-found');
         
         console.log(`Paired: ${socket.id} with ${partnerId}`);
       } else {
@@ -70,7 +69,6 @@ io.on('connection', (socket) => {
     } else {
       waitingUsers.push(socket.id);
       socket.emit('waiting-for-partner');
-      console.log('User added to waiting list:', socket.id);
     }
   });
 
@@ -88,35 +86,25 @@ io.on('connection', (socket) => {
   socket.on('webrtc-offer', (data) => {
     const partnerId = activePairs.get(socket.id);
     if (partnerId) {
-      socket.to(partnerId).emit('webrtc-offer', {
-        offer: data.offer,
-        from: socket.id
-      });
+      socket.to(partnerId).emit('webrtc-offer', data.offer);
     }
   });
 
   socket.on('webrtc-answer', (data) => {
     const partnerId = activePairs.get(socket.id);
     if (partnerId) {
-      socket.to(partnerId).emit('webrtc-answer', {
-        answer: data.answer,
-        from: socket.id
-      });
+      socket.to(partnerId).emit('webrtc-answer', data.answer);
     }
   });
 
   socket.on('webrtc-ice-candidate', (data) => {
     const partnerId = activePairs.get(socket.id);
     if (partnerId) {
-      socket.to(partnerId).emit('webrtc-ice-candidate', {
-        candidate: data.candidate,
-        from: socket.id
-      });
+      socket.to(partnerId).emit('webrtc-ice-candidate', data.candidate);
     }
   });
 
   socket.on('next-partner', () => {
-    console.log('Next partner requested by:', socket.id);
     const partnerId = activePairs.get(socket.id);
     if (partnerId) {
       socket.to(partnerId).emit('partner-disconnected');
@@ -144,7 +132,9 @@ io.on('connection', (socket) => {
   });
 });
 
+// Use Railway's port or default to 3000
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Lchangra Random Chat running on port ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Lchangra Random Video Chat running on port ${PORT}`);
+  console.log(`📱 Open your browser and test the app!`);
 });
