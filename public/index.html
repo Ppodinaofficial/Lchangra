@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lchangra - Random Video Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="screen active">
+            <div class="welcome-container">
+                <div class="app-header">
+                    <h1><i class="fas fa-random"></i> Lchangra</h1>
+                    <p>Video Chat with Random Strangers</p>
+                </div>
+                <div class="welcome-buttons">
+                    <button id="startChatBtn" class="btn-primary">
+                        <i class="fas fa-video"></i> Start Random Chat
+                    </button>
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-shuffle"></i>
+                            <span>Random Partners</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-video"></i>
+                            <span>Video Calls</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-comment"></i>
+                            <span>Text Chat</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-arrow-right"></i>
+                            <span>Next Button</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chatScreen" class="screen">
+            <div class="chat-container">
+                <!-- Header -->
+                <div class="chat-header">
+                    <div class="header-left">
+                        <h2><i class="fas fa-random"></i> Lchangra</h2>
+                        <div id="connectionStatus" class="status-waiting">
+                            <i class="fas fa-search"></i> Searching for partner...
+                        </div>
+                    </div>
+                    <div class="header-controls">
+                        <button id="nextBtn" class="btn-next" disabled>
+                            <i class="fas fa-arrow-right"></i> Next
+                        </button>
+                        <button id="leaveBtn" class="btn-leave">
+                            <i class="fas fa-sign-out-alt"></i> Leave
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="main-content">
+                    <!-- Video Area -->
+                    <div class="video-area">
+                        <div id="waitingScreen" class="waiting-screen active">
+                            <div class="waiting-content">
+                                <div class="spinner"></div>
+                                <h3>Finding you a random partner...</h3>
+                                <p>Please allow camera and microphone access</p>
+                            </div>
+                        </div>
+
+                        <div id="videoContainer" class="video-container hidden">
+                            <div class="video-wrapper">
+                                <video id="localVideo" autoplay muted playsinline></video>
+                                <div class="video-label">You</div>
+                            </div>
+                            <div class="video-wrapper">
+                                <video id="remoteVideo" autoplay playsinline></video>
+                                <div class="video-label">Stranger</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Area -->
+                    <div class="chat-area">
+                        <div id="messagesContainer" class="messages-container"></div>
+                        <div class="message-input-container">
+                            <input type="text" id="messageInput" placeholder="Type a message..." maxlength="500" disabled>
+                            <button id="sendBtn" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permission Modal -->
+    <div id="permissionModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Camera & Microphone Required</h3>
+            <p>Please allow camera and microphone access to start video chat.</p>
+            <button id="retryPermissions" class="btn-primary">Allow Access</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "lchangra",
+  "version": "1.0.0",
+  "description": "Random Video Chat Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  },
+  "keywords": ["videochat", "random", "omegle"],
+  "author": "Lchangra",
+  "license": "MIT"
+}
